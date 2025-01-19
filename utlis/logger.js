@@ -8,7 +8,8 @@ const logger = (request, responce, next) => {
     console.log(`Request Cookies: ${JSON.stringify(request.cookies)}`);
     console.log(`-----------------------------`);
     console.log("Cookies:", request.cookies);
-    // console.log("Token:", token);
+    console.log("Token:", request.cookies.token);
+
     console.log(`-----------------------------`);
 
     next()

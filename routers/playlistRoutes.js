@@ -1,28 +1,28 @@
 const express = require('express');
-const router = express.Router();
+const { authenticate } = require('../middlewares/authMiddleware.js');
+const playlistController = require('../controller/playlistController.js');
+const playlistRoutes = express.Router();
 
-// Controller functions
-const {
-  getPlaylists,
-  getPlaylistById,
-  addPlaylist,
-  updatePlaylist,
-  deletePlaylist
-} = require('../controllers/playlistController');
 
-// Route to get all playlists
-router.get('/', getPlaylists);
+// Create a new playlist (requires authentication)
+playlistRoutes.post('/', authenticate, playlistController.createPlaylist);
 
-// Route to get a playlist by ID
-router.get('/:id', getPlaylistById);
+// Get a single playlist by its ID
+playlistRoutes.get('/:playlistId', playlistController.getPlaylistById);
 
-// Route to add a new playlist
-router.post('/', addPlaylist);
+// Get all playlists (optional, could be paginated)
+playlistRoutes.get('/', playlistController.getUserPlaylists);
 
-// Route to update a playlist by ID
-router.put('/:id', updatePlaylist);
+// Update playlist details (requires authentication)
+playlistRoutes.put('/:playlistId', authenticate, playlistController.updatePlaylist);
 
-// Route to delete a playlist by ID
-router.delete('/:id', deletePlaylist);
+// Delete a playlist (requires authentication)
+playlistRoutes.delete('/:playlistId', authenticate, playlistController.deletePlaylist);
 
-module.exports = router;
+// Add a track to a playlist (requires authentication)
+playlistRoutes.post('/:playlistId/track/:trackId', authenticate, playlistController.addTrackToPlaylist);
+
+// Remove a track from a playlist (requires authentication)
+playlistRoutes.delete('/:playlistId/track/:trackId', authenticate, playlistController.removeTrackFromPlaylist);
+
+module.exports = playlistRoutes;

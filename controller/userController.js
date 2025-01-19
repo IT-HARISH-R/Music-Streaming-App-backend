@@ -1,4 +1,4 @@
-const User = require('../models/userModels');
+const User = require('../models/userModel');
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { SECRET_KEY, EMAIL, PASS } = require('../utlis/config')
@@ -65,7 +65,13 @@ const userController = {
                 SECRET_KEY,
                 { expiresIn: '1h' }
             )
-            response.cookie('token', token, { httpOnly: true, maxAge: 360000 })
+            console.log(token)
+            response.cookie('token', token, {
+                httpOnly: true,
+                maxAge: 3600000, // 1 hour
+                secure: false, // Set to true in production with HTTPS
+                sameSite: "lax" // Adjust depending on client/server setup
+            });
             return response.json({ status: true, token, message: "logg in successfully" });
         }
         catch (error) {
@@ -122,17 +128,15 @@ const userController = {
         }
     },
     me: async (request, response) => {
-
-        const userid = request.user_id.id
         try {
-
+            const userid = request.userId
             const user = await User.findById(userid);
-
-            if(!user){
+            console.log(user)
+            if (!user) {
                 return response.status(404).json({ message: "user not found" });
             }
 
-            response.json({user})
+            response.json({ user })
         }
         catch (error) {
             response.status(500).json({ message: error.message });

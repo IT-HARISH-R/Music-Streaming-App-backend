@@ -1,28 +1,22 @@
 const express = require('express');
-const router = express.Router();
+const trackRoutes = express.Router();
+const { authenticate } = require('../middlewares/authMiddleware.js');
+const trackController = require('../controller/trackController.js');
 
-// Controller functions
-const {
-  getTracks,
-  searchTracks,
-  addTrack,
-  updateTrack,
-  deleteTrack
-} = require('../controllers/trackController');
+// Add a new track (requires authentication)
+// trackRoutes.post('/', authenticate, addTrack);
+trackRoutes.post('/', authenticate, trackController.createTrack);
 
-// Route to get all tracks
-router.get('/', getTracks);
+// Get a single track by its ID
+trackRoutes.get('/:trackId', trackController.getTrackById);
 
-// Route to search for tracks by query parameters (e.g., name, artist, album, genre)
-router.get('/search', searchTracks);
+// Get all tracks (optional, could be paginated)
+trackRoutes.get('/',trackController.getAllTracks);
 
-// Route to add a new track
-router.post('/', addTrack);
+// Update track details (requires authentication)
+trackRoutes.put('/:trackId', authenticate, trackController.updateTrack);
 
-// Route to update a track by ID
-router.put('/:id', updateTrack);
+// Delete a track (requires authentication)
+trackRoutes.delete('/:trackId', authenticate, trackController.deleteTrack);
 
-// Route to delete a track by ID
-router.delete('/:id', deleteTrack);
-
-module.exports = router;
+module.exports = trackRoutes;
