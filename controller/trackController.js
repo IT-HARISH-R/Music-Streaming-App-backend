@@ -1,29 +1,49 @@
-const Track = require('../models/trackModel'); // Assuming Track model is in '../models/Track'
+const Track = require('../models/trackModel'); // Import the Track model
 
-// Track Controller object
 const trackController = {
   // Create a new track
   createTrack: async (req, res) => {
-    const { title, artist, album, genre, url, duration } = req.body;
-
     try {
-      // Create a new track
+      const { name, artist, album, genre, duration } = req.body;
+
+      // Check if an audio file is uploaded
+      if (!req.file) {
+        return res.status(400).json({ error: 'Audio file is required' });
+      }
+
+      // Create a new track document
       const newTrack = new Track({
-        title,
+        name,
         artist,
         album,
         genre,
-        url,
-        duration
+        duration,
+        audio: {
+          data: req.file.path, // File path saved by multer
+          // contentType: req.file.mimetype, // Optional: Save content type if needed
+        },
       });
 
-      // Save the track to the database
       await newTrack.save();
-
-      res.status(201).json({ msg: 'Track added successfully', track: newTrack });
+      res.status(201).json({ message: 'Track created successfully', track: newTrack });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ msg: 'Server error' });
+      res.status(500).json({ error: 'Error creating track', details: error.message });
+    }
+  },
+
+  // Get a single track by ID
+  getTrackById: async (req, res) => {
+    try {
+      const { trackId } = req.params;
+      const track = await Track.findById(trackId);
+
+      if (!track) {
+        return res.status(404).json({ error: 'Track not found' });
+      }
+
+      res.status(200).json(track);
+    } catch (error) {
+      res.status(500).json({ error: 'Error fetching track', details: error.message });
     }
   },
 
@@ -33,73 +53,46 @@ const trackController = {
       const tracks = await Track.find();
       res.status(200).json(tracks);
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ msg: 'Server error' });
+      res.status(500).json({ error: 'Error fetching tracks', details: error.message });
     }
   },
 
-  // Get track by ID
-  getTrackById: async (req, res) => {
-    const { trackId } = req.params;
-
-    try {
-      const track = await Track.findById(trackId);
-      if (!track) {
-        return res.status(404).json({ msg: 'Track not found' });
-      }
-      res.status(200).json(track);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ msg: 'Server error' });
-    }
-  },
-
-  // Update track details
+  // Update a track
   updateTrack: async (req, res) => {
-    const { trackId } = req.params;
-    const { title, artist, album, genre, url, duration } = req.body;
-
     try {
-      // Find track by ID and update it
-      const track = await Track.findById(trackId);
-      if (!track) {
-        return res.status(404).json({ msg: 'Track not found' });
+      const { Id } = req.params;
+      const updatedData = req.body;
+
+      const updatedTrack = await Track.findByIdAndUpdate(Id, updatedData, {
+        new: true, // Return the updated document
+        runValidators: true, // Validate the updates
+      });
+
+      if (!updatedTrack) {
+        return res.status(404).json({ error: 'Track not found' });
       }
 
-      // Update track details
-      track.title = title || track.title;
-      track.artist = artist || track.artist;
-      track.album = album || track.album;
-      track.genre = genre || track.genre;
-      track.url = url || track.url;
-      track.duration = duration || track.duration;
-
-      await track.save();
-
-      res.status(200).json({ msg: 'Track updated successfully', track });
+      res.status(200).json({ message: 'Track updated successfully', track: updatedTrack });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ msg: 'Server error' });
+      res.status(500).json({ error: 'Error updating track', details: error.message });
     }
   },
 
-  // Delete track
+  // Delete a track
   deleteTrack: async (req, res) => {
-    const { trackId } = req.params;
-
     try {
-      // Find and delete the track by ID
-      const track = await Track.findByIdAndDelete(trackId);
-      if (!track) {
-        return res.status(404).json({ msg: 'Track not found' });
+      const { trackId } = req.params;
+      const deletedTrack = await Track.findByIdAndDelete(trackId);
+
+      if (!deletedTrack) {
+        return res.status(404).json({ error: 'Track not found' });
       }
 
-      res.status(200).json({ msg: 'Track deleted successfully' });
+      res.status(200).json({ message: 'Track deleted successfully' });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ msg: 'Server error' });
+      res.status(500).json({ error: 'Error deleting track', details: error.message });
     }
-  }
+  },
 };
 
 module.exports = trackController;

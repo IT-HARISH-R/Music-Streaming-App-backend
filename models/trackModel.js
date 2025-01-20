@@ -23,35 +23,39 @@ const trackSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    releaseDate: {
-      type: Date,
-      required: true,
+    audio:{
+      data:Buffer,
+      // contentType:String
     },
+    // releaseDate: {
+    //   type: Date,
+    //   required: true,
+    // },
     duration: {
       type: Number, // Duration in seconds
       required: true,
     },
-    trackUrl: {
-      type: String,
-      required: true, // URL or path to the music file
-    },
+    // trackUrl: {
+    //   type: mongoose.Schema.Types.ObjectId, // Storing GridFS file ID
+    //   ref: 'TrackFile', // Reference to the file stored in GridFS
+    //   required: true,
+    // },
     artwork: {
-      type: String,
+      type: String, 
       default: 'default-album-art.jpg', // Default album artwork
     },
-    comments: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Comment',
-    }],
-    likes: {
-      type: Number,
-      default: 0,
-    },
-    isPremium: {
-      type: Boolean,
-      default: false, // Indicates if the track is for premium users
-    },
-    // Add any other necessary fields for tracks
+    // comments: [{
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: 'Comment',
+    // }],
+    // likes: {
+    //   type: Number,
+    //   default: 0,
+    // },
+    // isPremium: {
+    //   type: Boolean,
+    //   default: false, // Indicates if the track is for premium users
+    // },
   },
   { timestamps: true } // Automatically adds createdAt and updatedAt fields
 );
